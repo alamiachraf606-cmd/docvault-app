@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocsVault - Gestion de Documents</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .auth-section {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .user-info {
+            background: #e0e7ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .documents-section {
+            margin-top: 30px;
+        }
+
+        .document-card {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .document-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .document-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .document-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .status-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-draft {
+            background: #fbbf24;
+            color: #1c1917;
+        }
+
+        .status-published {
+            background: #22c55e;
+            color: #052e16;
+        }
+
+        .status-archived {
+            background: #64748b;
+            color: #f1f5f9;
+        }
+
+        .document-content {
+            color: #666;
+            margin-bottom: 15px;
+            white-space: pre-wrap;
+        }
+
+        .document-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .tag {
+            background: #6366f1;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+
+        .document-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .document-actions button {
+            width: auto;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .filters {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: end;
+        }
+
+        .filters .form-group {
+            margin-bottom: 0;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+
+        .history-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .history-item {
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #6366f1;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close-modal {
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📄 DocsVault</h1>
+            <p>Système de gestion de documents avec audit blockchain</p>
+        </header>
+
+        <div class="content">
+            <!-- Section Authentification -->
+            <div id="authSection" class="auth-section">
+                <h2 style="margin-bottom: 20px; text-align: center;">Connexion</h2>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" placeholder="email@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Mot de passe</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••">
+                </div>
+                <button onclick="login()">Se connecter</button>
+                <p style="text-align: center; margin-top: 15px; color: #666;">
+                    Pas de compte ? <a href="#" onclick="showRegister()" style="color: #6366f1;">S'inscrire</a>
+                </p>
+                <div id="authError" class="alert alert-error hidden"></div>
+            </div>
+
+            <!-- Section Inscription -->
+            <div id="registerSection" class="auth-section hidden">
+                <h2 style="margin-bottom: 20px; text-align: center;">Inscription</h2>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="registerEmail" placeholder="email@example.com">
+                </div>
+                <div class="form-group">
+                    <label>Mot de passe</label>
+                    <input type="password" id="registerPassword" placeholder="••••••••">
+                </div>
+                <div class="form-group">
+                    <label>Rôle</label>
+                    <select id="registerRole">
+                        <option value="user">Utilisateur</option>
+                        <option value="admin">Administrateur</option>
+                    </select>
+                </div>
+                <button onclick="register()">S'inscrire</button>
+                <p style="text-align: center; margin-top: 15px; color: #666;">
+                    Déjà un compte ? <a href="#" onclick="showLogin()" style="color: #6366f1;">Se connecter</a>
+                </p>
+                <div id="registerError" class="alert alert-error hidden"></div>
+            </div>
+
+            <!-- Section Application -->
+            <div id="appSection" class="hidden">
+                <div class="user-info">
+                    <div>
+                        <strong>Connecté en tant que:</strong> <span id="userEmail"></span>
+                        <span style="margin-left: 10px; padding: 3px 10px; background: #6366f1; color: white; border-radius: 15px; font-size: 12px;" id="userRole"></span>
+                    </div>
+                    <button onclick="logout()" style="width: auto; background: #ef4444;">Déconnexion</button>
+                </div>
+
+                <!-- Formulaire de création/édition -->
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                    <h2 id="formTitle">Créer un nouveau document</h2>
+                    <div class="form-group">
+                        <label>Titre</label>
+                        <input type="text" id="docTitle" placeholder="Titre du document">
+                    </div>
+                    <div class="form-group">
+                        <label>Contenu</label>
+                        <textarea id="docContent" placeholder="Contenu du document"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Tags (séparés par des virgules)</label>
+                        <input type="text" id="docTags" placeholder="urgent, important, projet">
+                    </div>
+                    <button onclick="saveDocument()" id="saveBtn">Créer le document</button>
+                    <button onclick="cancelEdit()" id="cancelBtn" class="hidden" style="margin-top: 10px; background: #64748b;">Annuler</button>
+                </div>
+
+                <!-- Filtres -->
+                <div class="filters">
+                    <div class="form-group">
+                        <label>Statut</label>
+                        <select id="filterStatus" onchange="loadDocuments()">
+                            <option value="">Tous</option>
+                            <option value="DRAFT">Brouillon</option>
+                            <option value="PUBLISHED">Publié</option>
+                            <option value="ARCHIVED">Archivé</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Recherche</label>
+                        <input type="text" id="filterSearch" placeholder="Rechercher..." onkeyup="loadDocuments()">
+                    </div>
+                    <div class="form-group">
+                        <button onclick="loadDocuments()" style="width: auto;">Actualiser</button>
+                    </div>
+                </div>
+
+                <!-- Liste des documents -->
+                <div id="documentsList" class="documents-section"></div>
+            </div>
+
+            <div id="message" class="alert hidden"></div>
+        </div>
+    </div>
+
+    <!-- Modal pour l'historique -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeHistoryModal()">&times;</button>
+            <h2>Historique du document</h2>
+            <div id="historyContent"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentToken = null;
+        let currentUser = null;
+        let editingDocumentId = null;
+        let currentVersion = null;
+
+        const API_URL = window.location.origin;
+
+        // Afficher les messages
+        function showMessage(text, type = 'success') {
+            const msgDiv = document.getElementById('message');
+            msgDiv.textContent = text;
+            msgDiv.className = `alert alert-${type}`;
+            msgDiv.classList.remove('hidden');
+            setTimeout(() => {
+                msgDiv.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Inscription
+        async function register() {
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const role = document.getElementById('registerRole').value;
+
+            try {
+                const response = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, role })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showMessage('Inscription réussie ! Vous pouvez maintenant vous connecter.', 'success');
+                    showLogin();
+                } else {
+                    document.getElementById('registerError').textContent = data.error;
+                    document.getElementById('registerError').classList.remove('hidden');
+                }
+            } catch (error) {
+                showMessage('Erreur lors de l\'inscription', 'error');
+            }
+        }
+
+        // Connexion
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    currentToken = data.token;
+                    currentUser = data.user;
+                    document.getElementById('userEmail').textContent = currentUser.email;
+                    document.getElementById('userRole').textContent = currentUser.role;
+                    document.getElementById('authSection').classList.add('hidden');
+                    document.getElementById('appSection').classList.remove('hidden');
+                    loadDocuments();
+                } else {
+                    document.getElementById('authError').textContent = data.error;
+                    document.getElementById('authError').classList.remove('hidden');
+                }
+            } catch (error) {
+                showMessage('Erreur lors de la connexion', 'error');
+            }
+        }
+
+        // Déconnexion
+        function logout() {
+            currentToken = null;
+            currentUser = null;
+            document.getElementById('authSection').classList.remove('hidden');
+            document.getElementById('appSection').classList.add('hidden');
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+        }
+
+        // Afficher l'inscription
+        function showRegister() {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('registerSection').classList.remove('hidden');
+        }
+
+        // Afficher la connexion
+        function showLogin() {
+            document.getElementById('registerSection').classList.add('hidden');
+            document.getElementById('authSection').classList.remove('hidden');
+        }
+
+        // Charger les documents
+        async function loadDocuments() {
+            try {
+                const status = document.getElementById('filterStatus').value;
+                const q = document.getElementById('filterSearch').value;
+                let url = `${API_URL}/documents?page=1&limit=50`;
+                if (status) url += `&status=${status}`;
+                if (q) url += `&q=${q}`;
+
+                const response = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    displayDocuments(data.documents);
+                } else {
+                    showMessage('Erreur lors du chargement des documents', 'error');
+                }
+            } catch (error) {
+                showMessage('Erreur lors du chargement des documents', 'error');
+            }
+        }
+
+        // Afficher les documents
+        function displayDocuments(documents) {
+            const listDiv = document.getElementById('documentsList');
+            if (documents.length === 0) {
+                listDiv.innerHTML = '<p style="text-align: center; color: #666;">Aucun document trouvé</p>';
+                return;
+            }
+
+            listDiv.innerHTML = documents.map(doc => {
+                const statusClass = `status-${doc.status.toLowerCase()}`;
+                return `
+                    <div class="document-card">
+                        <div class="document-header">
+                            <div class="document-title">${doc.title}</div>
+                            <span class="status-badge ${statusClass}">${doc.status}</span>
+                        </div>
+                        <div class="document-content">${doc.content}</div>
+                        <div class="document-tags">
+                            ${doc.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                        <div style="color: #666; font-size: 12px; margin-bottom: 15px;">
+                            Version: ${doc.version} | Créé: ${new Date(doc.createdAt).toLocaleString('fr-FR')}
+                        </div>
+                        <div class="document-actions">
+                            ${doc.status === 'DRAFT' ? `<button onclick="editDocument('${doc._id}', ${doc.version})">✏️ Modifier</button>` : ''}
+                            ${doc.status === 'DRAFT' ? `<button class="btn-success" onclick="publishDocument('${doc._id}', ${doc.version})">🚀 Publier</button>` : ''}
+                            ${doc.status === 'PUBLISHED' ? `<button class="btn-warning" onclick="archiveDocument('${doc._id}', ${doc.version})">📦 Archiver</button>` : ''}
+                            ${doc.status === 'DRAFT' ? `<button class="btn-warning" onclick="archiveDocument('${doc._id}', ${doc.version})">📦 Archiver</button>` : ''}
+                            ${doc.status === 'PUBLISHED' ? `<button onclick="editTags('${doc._id}', ${doc.version}, ${JSON.stringify(doc.tags).replace(/"/g, '&quot;')})">🏷️ Modifier tags</button>` : ''}
+                            <button onclick="viewHistory('${doc._id}')">📜 Historique</button>
+                            <button class="btn-danger" onclick="deleteDocument('${doc._id}', ${doc.version})">🗑️ Supprimer</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Créer/Sauvegarder un document
+        async function saveDocument() {
+            const title = document.getElementById('docTitle').value;
+            const content = document.getElementById('docContent').value;
+            const tags = document.getElementById('docTags').value.split(',').map(t => t.trim()).filter(t => t);
+
+            if (!title || !content) {
+                showMessage('Titre et contenu requis', 'error');
+                return;
+            }
+
+            try {
+                const url = editingDocumentId 
+                    ? `${API_URL}/documents/${editingDocumentId}`
+                    : `${API_URL}/documents`;
+                
+                const method = editingDocumentId ? 'PATCH' : 'POST';
+                const headers = {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${currentToken}`
+                };
+
+                if (editingDocumentId) {
+                    headers['If-Match'] = currentVersion.toString();
+                }
+
+                const body = { title, content, tags };
+
+                const response = await fetch(url, {
+                    method,
+                    headers,
+                    body: JSON.stringify(body)
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showMessage(editingDocumentId ? 'Document modifié avec succès' : 'Document créé avec succès', 'success');
+                    cancelEdit();
+                    loadDocuments();
+                } else {
+                    if (response.status === 409) {
+                        showMessage(`Conflit: ${data.error}. Rechargez la page.`, 'error');
+                        loadDocuments();
+                    } else {
+                        showMessage(data.error || 'Erreur lors de la sauvegarde', 'error');
+                    }
+                }
+            } catch (error) {
+                showMessage('Erreur lors de la sauvegarde', 'error');
+            }
+        }
+
+        // Éditer un document
+        function editDocument(id, version) {
+            const doc = Array.from(document.querySelectorAll('.document-card')).find(card => 
+                card.querySelector(`button[onclick*="${id}"]`)
+            );
+            
+            if (!doc) return;
+
+            const title = doc.querySelector('.document-title').textContent;
+            const content = doc.querySelector('.document-content').textContent;
+            const tags = Array.from(doc.querySelectorAll('.tag')).map(t => t.textContent).join(', ');
+
+            document.getElementById('docTitle').value = title;
+            document.getElementById('docContent').value = content;
+            document.getElementById('docTags').value = tags;
+            document.getElementById('formTitle').textContent = 'Modifier le document';
+            document.getElementById('saveBtn').textContent = 'Enregistrer les modifications';
+            document.getElementById('cancelBtn').classList.remove('hidden');
+
+            editingDocumentId = id;
+            currentVersion = version;
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Modifier uniquement les tags (pour documents publiés)
+        async function editTags(id, version, currentTags) {
+            const newTags = prompt('Modifier les tags (séparés par des virgules):', currentTags);
+            if (newTags === null) return;
+
+            try {
+                const tags = newTags.split(',').map(t => t.trim()).filter(t => t);
+                const response = await fetch(`${API_URL}/documents/${id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentToken}`,
+                        'If-Match': version.toString()
+                    },
+                    body: JSON.stringify({ tags })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showMessage('Tags modifiés avec succès', 'success');
+                    loadDocuments();
+                } else {
+                    showMessage(data.error || 'Erreur', 'error');
+                }
+            } catch (error) {
+                showMessage('Erreur', 'error');
+            }
+        }
+
+        // Annuler l'édition
+        function cancelEdit() {
+            document.getElementById('docTitle').value = '';
+            document.getElementById('docContent').value = '';
+            document.getElementById('docTags').value = '';
+            document.getElementById('formTitle').textContent = 'Créer un nouveau document';
+            document.getElementById('saveBtn').textContent = 'Créer le document';
+            document.getElementById('cancelBtn').classList.add('hidden');
+            editingDocumentId = null;
+            currentVersion = null;
+        }
+
+        // Publier un document
+        async function publishDocument(id, version) {
+            try {
+                const response = await fetch(`${API_URL}/documents/${id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentToken}`,
+                        'If-Match': version.toString()
+                    },
+                    body: JSON.stringify({ status: 'PUBLISHED' })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showMessage('Document publié avec succès', 'success');
+                    loadDocuments();
+                } else {
+                    showMessage(data.error || 'Erreur', 'error');
+                }
+            } catch (error) {
+                showMessage('Erreur', 'error');
+            }
+        }
+
+        // Archiver un document
+        async function archiveDocument(id, version) {
+            try {
+                const response = await fetch(`${API_URL}/documents/${id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentToken}`,
+                        'If-Match': version.toString()
+                    },
+                    body: JSON.stringify({ status: 'ARCHIVED' })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showMessage('Document archivé avec succès', 'success');
+                    loadDocuments();
+                } else {
+                    showMessage(data.error || 'Erreur', 'error');
+                }
+            } catch (error) {
+                showMessage('Erreur', 'error');
+            }
+        }
+
+        // Supprimer un document
+        async function deleteDocument(id, version) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer ce document ?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/documents/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'If-Match': version.toString()
+                    }
+                });
+
+                if (response.ok || response.status === 204) {
+                    showMessage('Document supprimé avec succès', 'success');
+                    loadDocuments();
+                } else {
+                    const data = await response.json();
+                    showMessage(data.error || 'Erreur', 'error');
+                }
+            } catch (error) {
+                showMessage('Erreur', 'error');
+            }
+        }
+
+        // Voir l'historique
+        async function viewHistory(id) {
+            try {
+                const response = await fetch(`${API_URL}/documents/${id}/history`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    const historyContent = document.getElementById('historyContent');
+                    if (data.history.length === 0) {
+                        historyContent.innerHTML = '<p>Aucun historique disponible</p>';
+                    } else {
+                        historyContent.innerHTML = data.history.map(item => `
+                            <div class="history-item">
+                                <strong>Action:</strong> ${item.action}<br>
+                                <strong>Date:</strong> ${new Date(item.timestamp).toLocaleString('fr-FR')}<br>
+                                ${item.beforeHash ? `<strong>Hash avant:</strong> <code>${item.beforeHash.substring(0, 16)}...</code><br>` : ''}
+                                ${item.afterHash ? `<strong>Hash après:</strong> <code>${item.afterHash.substring(0, 16)}...</code><br>` : ''}
+                                ${item.meta.statusChange ? `<strong>Changement de statut:</strong> ${item.meta.statusChange.from} → ${item.meta.statusChange.to}` : ''}
+                            </div>
+                        `).join('');
+                    }
+                    document.getElementById('historyModal').classList.add('active');
+                } else {
+                    showMessage('Erreur lors du chargement de l\'historique', 'error');
+                }
+            } catch (error) {
+                showMessage('Erreur', 'error');
+            }
+        }
+
+        // Fermer le modal d'historique
+        function closeHistoryModal() {
+            document.getElementById('historyModal').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
